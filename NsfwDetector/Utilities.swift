@@ -10,7 +10,7 @@ import UIKit
 import ImageIO
 
 extension CGImagePropertyOrientation {
-    init(_ orientation: UIImageOrientation) {
+    init(_ orientation: UIImage.Orientation) {
         switch orientation {
         case .up: self = .up
         case .upMirrored: self = .upMirrored
