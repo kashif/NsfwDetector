@@ -45,20 +45,25 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
         present(picker, animated: true)
     }
     
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+// Local variable inserted by Swift 4.2 migrator.
+let info = convertFromUIImagePickerControllerInfoKeyDictionary(info)
+
         picker.dismiss(animated: true)
         classificationLabel.text = "Analyzing Image..."
         
-        guard let uiImage = info[UIImagePickerControllerOriginalImage] as? UIImage
+        guard let uiImage = info[convertFromUIImagePickerControllerInfoKey(UIImagePickerController.InfoKey.originalImage)] as? UIImage
             else { fatalError("no image from image picker") }
         guard let ciImage = CIImage(image: uiImage)
             else { fatalError("can't create CIImage from UIImage") }
         let orientation = CGImagePropertyOrientation(uiImage.imageOrientation)
-        inputImage = ciImage.applyingOrientation(Int32(orientation.rawValue))
+        inputImage = ciImage.oriented(forExifOrientation: Int32(orientation.rawValue))
         
         imageView.image = uiImage
         
-        let handler = VNImageRequestHandler(ciImage: ciImage, orientation: Int32(orientation.rawValue))
+        //let handler = VNImageRequestHandler(cgImage: ciImage as! CGImage, orientation: orientation, options: [:])
+        let handler = VNImageRequestHandler(ciImage: ciImage, orientation: orientation, options: [:])
+        //let handler = VNImageRequestHandler(ciImage: ciImage, orientation: CGImagePropertyOrientation(rawValue: RawValue(Int32(orientation.rawValue))))
         DispatchQueue.global(qos: .userInteractive).async {
             do {
                 try handler.perform([self.classificationRequest])
@@ -89,3 +94,13 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
     }
 }
 
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIImagePickerControllerInfoKeyDictionary(_ input: [UIImagePickerController.InfoKey: Any]) -> [String: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map {key, value in (key.rawValue, value)})
+}
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertFromUIImagePickerControllerInfoKey(_ input: UIImagePickerController.InfoKey) -> String {
+	return input.rawValue
+}
